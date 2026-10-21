@@ -1,0 +1,15 @@
+diario-ingles/
+├── .gitignore              ✅ ya lo tenés
+├── README.md               ⬜ paso 1
+├── requirements.txt        ⬜ paso 1
+├── app.py                  ⬜ paso 2 (rutas Flask)
+├── grammar.py              ⬜ paso 2 (llamada a LanguageTool)
+├── database.py             ⬜ paso 5 (conexión SQLite)
+├── models.py               ⬜ paso 5 (modelo Entry)
+├── templates/
+│   └── index.html          ⬜ paso 3 (pantalla del diario)
+└── static/
+    ├── css/
+    │   └── style.css       ⬜ paso 4
+    └── js/
+        └── editor.js       ⬜ pasos 3 y 4 (última oración, /check, voz)
