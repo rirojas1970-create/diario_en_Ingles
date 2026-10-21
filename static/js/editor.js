@@ -32,26 +32,60 @@ async function checkLastSentence() {
   }
 }
 
+
+function buildHighlightedSentence(sentence, matches) {
+  const p = document.createElement("p");
+  p.className = "sentence";
+  let cursor = 0;
+
+  [...matches]
+    .sort((a, b) => a.offset - b.offset)
+    .forEach((m) => {
+      if (m.offset < cursor) return; // ignora errores que se solapan
+      p.append(sentence.slice(cursor, m.offset));
+      const mark = document.createElement("mark");
+      mark.textContent = sentence.slice(m.offset, m.offset + m.length);
+      p.append(mark);
+      cursor = m.offset + m.length;
+    });
+
+  p.append(sentence.slice(cursor));
+  return p;
+}
+
 function showResult(sentence, matches) {
   result.replaceChildren();
-
-  const original = document.createElement("p");
-  original.textContent = "Oración: " + sentence;
-  result.appendChild(original);
+  result.append(buildHighlightedSentence(sentence, matches));
 
   if (matches.length === 0) {
     const ok = document.createElement("p");
     ok.textContent = "✅ No encontré errores.";
-    result.appendChild(ok);
+    result.append(ok);
     return;
   }
 
   matches.forEach((m) => {
-    const fragment = sentence.slice(m.offset, m.offset + m.length);
-    const item = document.createElement("p");
-    item.textContent =
-      `"${fragment}": ${m.message} Sugerencias: ${m.suggestions.join(", ")}`;
-    result.appendChild(item);
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const message = document.createElement("p");
+    message.textContent = m.message;
+
+    const suggestions = document.createElement("p");
+    suggestions.className = "hidden";
+    suggestions.textContent = m.suggestions.length
+      ? "Sugerencias: " + m.suggestions.join(", ")
+      : "Sin sugerencias automáticas.";
+
+    const reveal = document.createElement("button");
+    reveal.textContent = "Ver sugerencia";
+    reveal.addEventListener("click", () => {
+      suggestions.classList.remove("hidden");
+      reveal.remove();
+    });
+
+    card.append(message, reveal, suggestions);
+    result.append(card);
   });
 }
 
