@@ -1,9 +1,16 @@
-from flask import Flask, request, jsonify, render_template
+import re
+
 import requests
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
 LANGUAGETOOL_URL = "https://api.languagetool.org/v2/check"
+
+IM_VERBO = re.compile(
+    r"\bI['’]m\s+(does|goes|has|likes|wants|plays|works|lives|needs|makes)\b",
+    re.IGNORECASE,
+)
 
 
 @app.route("/check", methods=["POST"])
@@ -33,7 +40,19 @@ def check():
         }
         for m in r.json()["matches"]
     ]
+
+    # Regla propia: "I'm" + verbo conjugado
+    m = IM_VERBO.search(sentence)
+    if m:
+        matches.append({
+            "message": "Después de \"I'm\" no va un verbo conjugado. ¿Quisiste decir \"I do\" o \"I'm doing\"?",
+            "offset": m.start(),
+            "length": m.end() - m.start(),
+            "suggestions": [],
+        })
+
     return jsonify({"matches": matches})
+
 
 @app.route("/")
 def index():
